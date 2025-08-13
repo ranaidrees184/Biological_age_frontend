@@ -322,7 +322,7 @@
                     Age (years)
                     <span class="tooltip" data-tooltip="Chronological age in years"></span>
                 </label>
-                <input type="number" id="age_years" name="age_years"  placeholder="21" required>
+                <input type="number" id="age_years" name="age_years"   placeholder="21" required>
             </div>
             
             <div class="form-group">
@@ -330,7 +330,7 @@
                     Albumin (g/L)
                     <span class="tooltip" data-tooltip="Serum albumin concentration"></span>
                 </label>
-                <input type="number" id="albumin_gl" name="albumin_gl"  placeholder="46.9" required>
+                <input type="number" id="albumin_gl" name="albumin_gl" step="0.00001"  placeholder="46.9" required>
             </div>
             
             <div class="form-group">
@@ -338,7 +338,7 @@
                     Creatinine (μmol/L)
                     <span class="tooltip" data-tooltip="Serum creatinine level"></span>
                 </label>
-                <input type="number" id="creatinine_umoll" name="creatinine_umoll"  placeholder="77.98" required>
+                <input type="number" id="creatinine_umoll" name="creatinine_umoll" step="0.00001"  placeholder="77.98" required>
             </div>
             
             <div class="form-group">
@@ -346,7 +346,7 @@
                     Glucose (mmol/L)
                     <span class="tooltip" data-tooltip="Blood glucose level"></span>
                 </label>
-                <input type="number" id="glucose_mmoll" name="glucose_mmoll"  placeholder="5.48" required>
+                <input type="number" id="glucose_mmoll" name="glucose_mmoll" step="0.00001"  placeholder="5.48" required>
             </div>
             
             <div class="form-group">
@@ -354,7 +354,7 @@
                     CRP (mg/dL)
                     <span class="tooltip" data-tooltip="C-reactive protein level"></span>
                 </label>
-                <input type="number" id="crp_mgdl" name="crp_mgdl"  placeholder="0.18" required>
+                <input type="number" id="crp_mgdl" name="crp_mgdl" step="0.00001"  placeholder="0.18" required>
             </div>
             
             <div class="form-group">
@@ -362,7 +362,7 @@
                     Lymphocyte (%)
                     <span class="tooltip" data-tooltip="Lymphocyte percentage"></span>
                 </label>
-                <input type="number" id="lymphocyte_percent" name="lymphocyte_percent"  placeholder="30.78" required>
+                <input type="number" id="lymphocyte_percent" name="lymphocyte_percent" step="0.00001"  placeholder="30.78" required>
             </div>
             
             <div class="form-group">
@@ -370,7 +370,7 @@
                     MCV (fL)
                     <span class="tooltip" data-tooltip="Mean corpuscular volume"></span>
                 </label>
-                <input type="number" id="mcv_fl" name="mcv_fl"  placeholder="89.95" required>
+                <input type="number" id="mcv_fl" name="mcv_fl" step="0.00001"  placeholder="89.95" required>
             </div>
             
             <div class="form-group">
@@ -378,7 +378,7 @@
                     RDW (%)
                     <span class="tooltip" data-tooltip="Red blood cell distribution width"></span>
                 </label>
-                <input type="number" id="rdw_percent" name="rdw_percent"  placeholder="12.15" required>
+                <input type="number" id="rdw_percent" name="rdw_percent" step="0.00001"  placeholder="12.15" required>
             </div>
             
             <div class="form-group">
@@ -386,7 +386,7 @@
                     ALP (U/L)
                     <span class="tooltip" data-tooltip="Alkaline phosphatase level"></span>
                 </label>
-                <input type="number" id="alkp_ul" name="alkp_ul"  placeholder="65.6" required>
+                <input type="number" id="alkp_ul" name="alkp_ul" step="0.00001"  placeholder="65.6" required>
             </div>
             
             <div class="form-group">
@@ -394,15 +394,7 @@
                     WBC (×10^9/L)
                     <span class="tooltip" data-tooltip="White blood cell count"></span>
                 </label>
-                <input type="number" id="wbc_10_9l" name="wbc_10_9l"  placeholder="6.65" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="chronic_age">
-                    Chronic Age
-                    <span class="tooltip" data-tooltip="Age adjusted for chronic conditions"></span>
-                </label>
-                <input type="number" id="chronic_age" name="chronic_age"  placeholder="21" required>
+                <input type="number" id="wbc_10_9l" name="wbc_10_9l" step="0.00001"  placeholder="6.65" required>
             </div>
             
             <button type="submit" class="predict-btn">Predict Phenoage</button>
