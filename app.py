@@ -1,78 +1,87 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, computed_field
-from typing import Literal, Annotated
-import pickle
-import pandas as pd
+from fastapi.responses import JSONResponse, HTMLResponse
+from pydantic import BaseModel, Field, ValidationError, validator
+from typing import Annotated
 import joblib
-import traceback
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
+import pandas as pd
 import numpy as np
 import time
 import uvicorn
 import os
-
-
 from fastapi.middleware.cors import CORSMiddleware
+import traceback
 
 # Path to your saved pickle file
-model_path = "xgb_model_reg.pkl"  
+model_path = "xgb_model_reg.pkl"
 
 # Load the model
 model = joblib.load(model_path)
 
-app=FastAPI()
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, use specific domains
+    allow_origins=["*"],  # Restrict in production
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-#pydantic Model to validate data
+# Pydantic Model to validate data
 class UserInput(BaseModel):
-    age: Annotated[int, Field(gt=0,description='Age of the Patient')]
-    albumin_gL: Annotated[float, Field(gt=0,description='Quantity of Albumin in gL')]
-    creat_umol: Annotated[float, Field(gt=0,description='Quantity of Creatnine in umol')]
-    glucose_mmol: Annotated[float, Field(gt=0,description='Qunatity of Glucose in mmol')]
-    lncrp:Annotated[float, Field(gt=0,description='Log of Crp')]
-    lymph: Annotated[float, Field(gt=0,description='lym ph')]
-    mcv: Annotated[float, Field(gt=0,description='mcv')]
-    rdw: Annotated[float, Field(gt=0,description='rdw')]
-    alp: Annotated[float, Field(gt=0,description='alp')]
-    wbc: Annotated[float, Field(gt=0,description='white blood cell')]
+    age_years: Annotated[int, Field(gt=0, lt=120, description="Chronological age in years")]
+    albumin_gl: Annotated[float, Field(ge=20, le=60, description="Serum albumin concentration in g/L")]
+    creatinine_umoll: Annotated[float, Field(gt=0, description="Serum creatinine level in μmol/L")]
+    glucose_mmoll: Annotated[float, Field(gt=0, description="Blood glucose level in mmol/L")]
+    lncrp: Annotated[float, Field(ge=0, description="Log of C-reactive protein level")]
+    lymphocyte_percent: Annotated[float, Field(ge=0, le=100, description="Lymphocyte percentage")]
+    mcv_fl: Annotated[float, Field(gt=0, description="Mean corpuscular volume in fL")]
+    rdw_percent: Annotated[float, Field(ge=0, le=20, description="Red blood cell distribution width in %")]
+    alkp_ul: Annotated[float, Field(gt=0, description="Alkaline phosphatase level in U/L")]
+    wbc_10_9l: Annotated[float, Field(gt=0, description="White blood cell count in ×10^9/L")]
+
+    @validator('*', pre=True)
+    def convert_to_float(cls, v):
+        return float(v) if v is not None else v
 
 @app.post('/predict')
-def predict_premium(data: UserInput):
+async def predict_premium(data: UserInput):
     try:
+        start_time = time.time()
+        
         input_df = pd.DataFrame(
             [
                 {
-                    'age': data.age,
-                    'albumin_gL': data.albumin_gL,
-                    'creat_umol': data.creat_umol,
-                    'glucose_mmol': data.glucose_mmol,
+                    'age': data.age_years,
+                    'albumin_gL': data.albumin_gl,
+                    'creat_umol': data.creatinine_umoll,
+                    'glucose_mmol': data.glucose_mmoll,
                     'lncrp': data.lncrp,
-                    'lymph': data.lymph,
-                    'mcv': data.mcv,
-                    'rdw': data.rdw,
-                    'alp': data.alp,
-                    'wbc': data.wbc
+                    'lymph': data.lymphocyte_percent,
+                    'mcv': data.mcv_fl,
+                    'rdw': data.rdw_percent,
+                    'alp': data.alkp_ul,
+                    'wbc': data.wbc_10_9l
                 }
             ]
         )
 
-        prediction_value = float(model.predict(input_df)[0])  # <-- FIXED HERE
+        prediction_value = float(model.predict(input_df)[0])
+        processing_time = time.time() - start_time
 
         return JSONResponse(
             status_code=200,
-            content={"Predicted Biological Age of Patient": prediction_value}
+            content={
+                "predicted_biological_age": prediction_value,
+                "status": "success",
+                "model_type": "XGBoost Regression",
+                "processing_time": f"{processing_time:.2f} seconds"
+            }
         )
+    except ValidationError as e:
+        return JSONResponse(status_code=422, content={"detail": e.errors()})
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        traceback.print_exc()  # Log full stack trace for debugging
+        return JSONResponse(status_code=500, content={"detail": [f"Server error: {str(e)}"]})
 
 # Serve the main HTML page
 @app.get("/", response_class=HTMLResponse)
@@ -84,5 +93,5 @@ async def root():
     except FileNotFoundError:
         return HTMLResponse(content="<h1>index.html not found</h1>", status_code=404)
 
-if __name__ == "_main_":
+if __name__ == "__main__":  # Fixed typo here
     uvicorn.run(app, host="0.0.0.0", port=10000)
