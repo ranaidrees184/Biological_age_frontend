@@ -476,37 +476,76 @@
             errorDiv.style.display = 'block';
             document.getElementById('loading').style.display = 'none';
         }
+// ... existing code ...
 
-        function validateForm(data) {
-            const errors = [];
-            
-            if (data.age_years < 0 || data.age_years > 120) {
-                errors.push('Age must be between 0 and 120 years');
-            }
-            if (data.albumin_gl < 20 || data.albumin_gl > 60) {
-                errors.push('Albumin must be between 20 and 60 g/L');
-            }
-            // Add more validation as needed
-            
-            return errors;
+    // Improved validation rules
+    function validateForm(data) {
+        const errors = [];
+        
+        // Age validation
+        if (data.age_years < 1 || data.age_years > 120) {
+            errors.push('Age must be between 1 and 120 years');
+            document.getElementById('age_years').closest('.form-group').classList.add('error');
         }
+        
+        // Albumin validation
+        if (data.albumin_gl < 20 || data.albumin_gl > 60) {
+            errors.push('Albumin must be between 20 and 60 g/L');
+            document.getElementById('albumin_gl').closest('.form-group').classList.add('error');
+        }
+        
+        // CRP validation
+        if (data.crp_mgdl <= 0) {
+            errors.push('CRP must be greater than 0');
+            document.getElementById('crp_mgdl').closest('.form-group').classList.add('error');
+        }
+        
+        // Lymphocyte validation
+        if (data.lymphocyte_percent < 0 || data.lymphocyte_percent > 100) {
+            errors.push('Lymphocyte percentage must be between 0-100%');
+            document.getElementById('lymphocyte_percent').closest('.form-group').classList.add('error');
+        }
+        
+        // RDW validation
+        if (data.rdw_percent < 0 || data.rdw_percent > 20) {
+            errors.push('RDW must be between 0-20%');
+            document.getElementById('rdw_percent').closest('.form-group').classList.add('error');
+        }
+        
+        return errors;
+    }
 
-        // Real API call to FastAPI backend
+        // Improved error handling
         async function callAPI(data) {
-            const response = await fetch('/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    
+                    // Handle validation errors
+                    if (errorData.detail && Array.isArray(errorData.detail)) {
+                        const messages = errorData.detail.map(item => {
+                            if (item.msg) return item.msg;
+                            if (item.loc) return `${item.loc[1]}: ${item.msg}`;
+                            return JSON.stringify(item);
+                        });
+                        throw new Error(messages.join('; '));
+                    }
+                    
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                throw new Error(error.message || 'Network error');
             }
-            
-            return await response.json();
         }
 
         document.getElementById('predictionForm').addEventListener('submit', async function(e) {
