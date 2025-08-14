@@ -27,7 +27,7 @@ app.add_middleware(
 )
 
 # Pydantic Model to validate data
-class BiomarkerInput(BaseModel):
+class UserInput(BaseModel):
     age_years: Annotated[int, Field(gt=0, lt=120, description="Chronological age in years")]
     albumin_gl: Annotated[float, Field(ge=20, le=60, description="Serum albumin concentration in g/L")]
     creatinine_umoll: Annotated[float, Field(gt=0, description="Serum creatinine level in μmol/L")]
@@ -39,7 +39,7 @@ class BiomarkerInput(BaseModel):
     alkp_ul: Annotated[float, Field(gt=0, description="Alkaline phosphatase level in U/L")]
     wbc_10_9l: Annotated[float, Field(gt=0, description="White blood cell count in ×10^9/L")]
 
-
+    
 
 @app.post('/predict')
 async def predict_premium(data: UserInput):
