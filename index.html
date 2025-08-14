@@ -322,7 +322,7 @@
                     Age (years)
                     <span class="tooltip" data-tooltip="Chronological age in years"></span>
                 </label>
-                <input type="number" id="age_years" name="age_years"   placeholder="21" required>
+                <input type="number" id="age_years" name="age_years" step="0.00001"  placeholder="21" required>
             </div>
             
             <div class="form-group">
@@ -338,7 +338,7 @@
                     Creatinine (μmol/L)
                     <span class="tooltip" data-tooltip="Serum creatinine level"></span>
                 </label>
-                <input type="number" id="creatinine_umoll" name="creatinine_umoll" step="0.00001"  placeholder="77.98" required>
+                <input type="number" id="creatinine_umoll" name="creatinine_umoll" step="0.00001" placeholder="77.98" required>
             </div>
             
             <div class="form-group">
@@ -346,7 +346,7 @@
                     Glucose (mmol/L)
                     <span class="tooltip" data-tooltip="Blood glucose level"></span>
                 </label>
-                <input type="number" id="glucose_mmoll" name="glucose_mmoll" step="0.00001"  placeholder="5.48" required>
+                <input type="number" id="glucose_mmoll" name="glucose_mmoll" step="0.00001" placeholder="5.48" required>
             </div>
             
             <div class="form-group">
@@ -354,7 +354,7 @@
                     CRP (mg/dL)
                     <span class="tooltip" data-tooltip="C-reactive protein level"></span>
                 </label>
-                <input type="number" id="crp_mgdl" name="crp_mgdl" step="0.00001"  placeholder="0.18" required>
+                <input type="number" id="crp_mgdl" name="crp_mgdl" step="0.00001" placeholder="0.18" required>
             </div>
             
             <div class="form-group">
@@ -370,7 +370,7 @@
                     MCV (fL)
                     <span class="tooltip" data-tooltip="Mean corpuscular volume"></span>
                 </label>
-                <input type="number" id="mcv_fl" name="mcv_fl" step="0.00001"  placeholder="89.95" required>
+                <input type="number" id="mcv_fl" name="mcv_fl" step="0.00001" placeholder="89.95" required>
             </div>
             
             <div class="form-group">
@@ -378,7 +378,7 @@
                     RDW (%)
                     <span class="tooltip" data-tooltip="Red blood cell distribution width"></span>
                 </label>
-                <input type="number" id="rdw_percent" name="rdw_percent" step="0.00001"  placeholder="12.15" required>
+                <input type="number" id="rdw_percent" name="rdw_percent" step="0.00001" placeholder="12.15" required>
             </div>
             
             <div class="form-group">
@@ -386,7 +386,7 @@
                     ALP (U/L)
                     <span class="tooltip" data-tooltip="Alkaline phosphatase level"></span>
                 </label>
-                <input type="number" id="alkp_ul" name="alkp_ul" step="0.00001"  placeholder="65.6" required>
+                <input type="number" id="alkp_ul" name="alkp_ul" step="0.00001" placeholder="65.6" required>
             </div>
             
             <div class="form-group">
@@ -394,9 +394,8 @@
                     WBC (×10^9/L)
                     <span class="tooltip" data-tooltip="White blood cell count"></span>
                 </label>
-                <input type="number" id="wbc_10_9l" name="wbc_10_9l" step="0.00001"  placeholder="6.65" required>
+                <input type="number" id="wbc_10_9l" name="wbc_10_9l" step="0.00001" placeholder="6.65" required>
             </div>
-            
             <button type="submit" class="predict-btn">Predict Phenoage</button>
             <button type="button" class="reset-btn" onclick="resetForm()">Reset</button>
         </form>
@@ -424,7 +423,7 @@
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">Processing Time</div>
-                    <div class="detail-value" id="processingTime"> 1 second</div>
+                    <div class="detail-value" id="processingTime">< 1 second</div>
                 </div>
             </div>
         </div>
@@ -443,6 +442,7 @@
             rdw_percent: 12.15,
             alkp_ul: 65.6,
             wbc_10_9l: 6.65,
+            chronic_age: 21
         };
 
         // Load sample data on page load
@@ -510,57 +510,56 @@
         }
 
         document.getElementById('predictionForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Hide previous results and errors
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('errorMessage').style.display = 'none';
-    
-    // Show loading
-    document.getElementById('loading').style.display = 'block';
-    
-    // Collect form data
-    const formData = new FormData(e.target);
-    const data = {};
-    for (let [key, value] of formData.entries()) {
-        data[key] = parseFloat(value);
-    }
-    console.log('Form Data Collected:', data);
-    
-    // Validate data
-    const errors = validateForm(data);
-    if (errors.length > 0) {
-        showError('Validation Error: ' + errors.join(', '));
-        return;
-    }
-    
-    try {
-        console.log('Data sent to API:', data);
-        const result = await callAPI(data);
-        
-        // Hide loading and show results
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('results').style.display = 'block';
-        
-        // Update results
-        document.getElementById('predictedAge').textContent = 
-            result.predicted_biological_age.toFixed(2) + ' years';
-        document.getElementById('status').textContent = result.status;
-        document.getElementById('detailStatus').textContent = result.status;
-        document.getElementById('modelType').textContent = result.model_type;
-        document.getElementById('processingTime').textContent = result.processing_time;
-        
-        // Scroll to results
-        document.getElementById('results').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+            e.preventDefault();
+            
+            // Hide previous results and errors
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = parseFloat(value);
+            }
+            
+            // Validate data
+            const errors = validateForm(data);
+            if (errors.length > 0) {
+                showError('Validation Error: ' + errors.join(', '));
+                return;
+            }
+            
+            try {
+                // Call the FastAPI backend
+                const result = await callAPI(data);
+                
+                // Hide loading and show results
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                // Update results
+                document.getElementById('predictedAge').textContent = 
+                    result.predicted_biological_age.toFixed(2) + ' years';
+                document.getElementById('status').textContent = result.status;
+                document.getElementById('detailStatus').textContent = result.status;
+                document.getElementById('modelType').textContent = result.model_type;
+                document.getElementById('processingTime').textContent = result.processing_time;
+                
+                // Scroll to results
+                document.getElementById('results').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+            } catch (error) {
+                showError('Prediction failed: ' + error.message);
+                console.error('API Error:', error);
+            }
         });
-        
-    } catch (error) {
-        showError('Prediction failed: ' + error.message);
-        console.error('API Error:', error);
-    }
-});
 
         // Add real-time validation
         document.querySelectorAll('input[type="number"]').forEach(input => {
