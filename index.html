@@ -418,10 +418,6 @@
                     <div class="detail-value" id="detailStatus">Success</div>
                 </div>
                 <div class="detail-item">
-                    <div class="detail-label">Model Type</div>
-                    <div class="detail-value" id="modelType">AI/ML Prediction</div>
-                </div>
-                <div class="detail-item">
                     <div class="detail-label">Processing Time</div>
                     <div class="detail-value" id="processingTime">< 1 second</div>
                 </div>
@@ -585,7 +581,6 @@
                     result.predicted_biological_age.toFixed(2) + ' years';
                 document.getElementById('status').textContent = result.status;
                 document.getElementById('detailStatus').textContent = result.status;
-                document.getElementById('modelType').textContent = result.model_type;
                 document.getElementById('processingTime').textContent = result.processing_time;
                 
                 // Scroll to results
